@@ -42,7 +42,7 @@ function tigo_money_woo_notices($notice){
 	<?php
 }
 function requeriments_tigo_money_woo(){
-	if ( version_compare( '5.6.0', PHP_VERSION, '>' ) ) {
+	if ( version_compare( '7.6.0', PHP_VERSION, '>' ) ) {
 		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
 			$php = __( 'Tigo Money Woo: Requires php version 5.6.0 or higher.', 'tigo-money-woo' );
 			do_action('notices_action_tag_tigo_woo', $php);

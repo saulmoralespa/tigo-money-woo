@@ -66,3 +66,4 @@ Simple, cuando realiza cambios se le informara si hay un error. Durante el proce
 ### ¿ Qué más debo tener en cuenta, que no me hayas dicho ? ####
 
 * Tener en cuenta que el nombre de agente establecido en su cuenta de Tigo Money concuerde con el nombre del sitio, para verificar ir dentro del panel de adminstracin de wordpress al menú ajustes / generales / Título del sitio.
+* Las urls tanto redirectUri y callbackUr deben ser una sola, ejemplo https://www.ejemplo.com debe concidir con la que proporciona usar en Tigo Money y la del home de su instalación de wordpress para cerciorarse vaya al panel de administracion / ajustes / generales / Dirección del sitio (URL). 

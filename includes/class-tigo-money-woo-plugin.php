@@ -210,7 +210,7 @@ class Tigo_Money_Woo_Plugin
 			$transactionid = "{$order_id}id".time();
 			$authorization = "Authorization: Bearer $token->accessToken";
 			$total=round($order->get_total(),2);
-			$array = array('Subscriber' => array('account' => $_POST['number_subscriber_tigo_money'], 'countryCode' => '595', 'country' => 'PRY', 'emailId' => $order->get_billing_email()), 'MasterMerchant' => array('account' => $WC_Tigo_Money_Woo->get_option('account'), 'pin' => $WC_Tigo_Money_Woo->get_option('pin'), 'id' => get_bloginfo('name')), 'redirectUri' => home_url(), 'callbackUri' => home_url(), 'language' => 'spa', 'OriginPayment' => array('amount' => $total, 'currencyCode' => 'PYG', 'tax' => '0.00', 'fee' => '0.00'), 'exchangeRate' => '1', 'LocalPayment' => array('amount' => $total, 'currencyCode' => 'PYG'), 'merchantTransactionId' => $transactionid);
+			$array = array('Subscriber' => array('account' => $_POST['number_subscriber_tigo_money'], 'countryCode' => '595', 'country' => 'PRY', 'emailId' => $order->get_billing_email()), 'MasterMerchant' => array('account' => $WC_Tigo_Money_Woo->get_option('account'), 'pin' => $WC_Tigo_Money_Woo->get_option('pin'), 'id' => get_bloginfo('name')), 'redirectUri' => home_url('/'), 'callbackUri' => home_url('/'), 'language' => 'spa', 'OriginPayment' => array('amount' => $total, 'currencyCode' => 'PYG', 'tax' => '0.00', 'fee' => '0.00'), 'exchangeRate' => '1', 'LocalPayment' => array('amount' => $total, 'currencyCode' => 'PYG'), 'merchantTransactionId' => $transactionid);
 			$json = json_encode($array);
 			$redirectUrl = tigo_money_woo()->cURL->execute($WC_Tigo_Money_Woo->createUrl(),$json,$authorization);
 			$redirectUrl = json_decode($redirectUrl);
