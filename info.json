@@ -1,0 +1,9 @@
+{
+  "name" : "Tigo Money Woo",
+  "version" : "1.0.0",
+  "author" : "Saul Morales Pacheco",
+  "download_url" : "http://uploadscosas.s3.amazonaws.com/wordpress/plugins/tigo-money-woo/tigo-money-woo.zip",
+  "sections" : {
+    "description" : "<h1>Simple medio de pago de Tigo Money para Paraguay.</h1>"
+  }
+}
