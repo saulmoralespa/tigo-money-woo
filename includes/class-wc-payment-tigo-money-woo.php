@@ -20,6 +20,7 @@ class WC_Payment_Tigo_Money_Woo extends WC_Payment_Gateway
 		$this->supports = array('products');
 		$this->init_form_fields();
 		$this->init_settings();
+		$this->title = $this->get_option('title');
 		add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
 		add_action('woocommerce_receipt_' . $this->id, array(&$this, 'receipt_page'));
 		add_filter('woocommerce_thankyou_order_received_text', array($this, 'order_received_message'), 10, 2 );
@@ -128,10 +129,7 @@ Money', 'epayco_woocommerce'),
 		$order = wc_get_order( $order_id );
 		$order->reduce_order_stock();
 		WC()->cart->empty_cart();
-		return array
-		(
-			'result' => 'success',
-			'redirect' => add_query_arg('order-pay',  $order->get_id(), add_query_arg('key', $order->get_order_key(), get_permalink(get_option('woocommerce_pay_page_id'))))
+		return array('result' => 'success', 'redirect' => $order->get_checkout_payment_url(true)
 		);
 	}
 
