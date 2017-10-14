@@ -1,3 +1,7 @@
+if( jQuery('form#account_subscriber_tigo_money').length )         // use this if you are using id to check
+{
+    jQuery('input[name=number_subscriber_tigo_money]').focus();
+}
 jQuery('form#account_subscriber_tigo_money').submit(function (e) {
     e.preventDefault();
     var  number_suscribir =jQuery('input[name=number_subscriber_tigo_money]').val();

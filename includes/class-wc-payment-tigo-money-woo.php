@@ -155,10 +155,16 @@ Money', 'epayco_woocommerce'),
 
 	    global $woocommerce;
 		$order = new WC_Order($order_id);
-		?>
+		echo $this->generate_tigo_money_form($order);
+
+	}
+
+	public function generate_tigo_money_form($order)
+    {
+	    ?>
         <form id="account_subscriber_tigo_money">
             <label for=""><?php echo __('Número Tigo Money','tigo-money-woo');?></label><input type='tel' name="number_subscriber_tigo_money" value="<?php echo $order->get_billing_phone();?>" required pattern="^(09)[0-9\/]{8,8}">
-            <input type="hidden" name="id_order_tigo_money" value="<?php echo $order_id;?>">
+            <input type="hidden" name="id_order_tigo_money" value="<?php echo $order->get_id();?>">
             <button type="submit"><?php echo __('Pagar','tigo-money-woo');?></button>
         </form>
         <div class='overlay-tigo-money-woo' style='display: none;'>
@@ -166,9 +172,8 @@ Money', 'epayco_woocommerce'),
                 <img src='<?php echo tigo_money_woo()->plugin_url . "assets/img/loading29.gif"; ?>' alt='Loading ...'>
             </div>
         </div>
-		<?php
-
-	}
+	    <?php
+    }
 
 	public function restore_order_stock($order_id)
 	{
