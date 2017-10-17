@@ -27,11 +27,6 @@ function tigo_money_woo_init()
 
 	tigo_money_woo()->tigo_run();
 
-	//Update individual
-	require_once('plugin-update-checker/plugin-update-checker.php');
-	$myUpdateChecker  =  PucFactory :: buildUpdateChecker(
-		'https://uploadscosas.s3.amazonaws.com/wordpress/plugins/tigo-money-woo/tigo-money-woo/info.json',
-		__FILE__);
 }
 add_action('notices_action_tag_tigo_woo', 'tigo_money_woo_notices', 10, 1);
 function tigo_money_woo_notices($notice){
