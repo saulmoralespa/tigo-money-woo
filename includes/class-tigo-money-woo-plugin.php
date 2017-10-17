@@ -52,6 +52,12 @@ class Tigo_Money_Woo_Plugin
 	 * @var WC_Gateway_PCW_Settings
 	 */
 	public $settings;
+
+	/**
+	 * @var WC_Logger
+	 */
+	public $logger;
+
 	public function __construct($file, $version)
 	{
 		$this->file = $file;
@@ -60,6 +66,7 @@ class Tigo_Money_Woo_Plugin
 		$this->plugin_path   = trailingslashit( plugin_dir_path( $this->file ) );
 		$this->plugin_url    = trailingslashit( plugin_dir_url( $this->file ) );
 		$this->includes_path = $this->plugin_path . trailingslashit( 'includes' );
+		$this->logger = new WC_Logger();
 	}
 
 	public function tigo_run()
@@ -86,13 +93,6 @@ class Tigo_Money_Woo_Plugin
 		add_action( 'wp', array($this, 'return_params_tigo_money'));
 		add_action('wp_ajax_tigo_money_form',array($this,'tigo_money_form_suscribir'));
 		add_action('wp_ajax_nopriv_tigo_money_form',array($this,'tigo_money_form_suscribir'));
-		$this->_load_handlers();
-	}
-
-	protected function _load_handlers()
-	{
-		require_once ($this->includes_path . 'class-tigo-money-woo-curl.php');
-		$this->cURL = new Tigo_Money_Woo_Curl();
 	}
 
 	public function plugin_action_links($links)
@@ -132,7 +132,8 @@ class Tigo_Money_Woo_Plugin
 		$order_id =(int)$order_id[0];
 		$order = new WC_Order($order_id);
 		$WC_Tigo_Money_Woo = new WC_Payment_Tigo_Money_Woo();
-		$logger = new WC_Logger();
+		$print = print_r($_REQUEST,true);
+		$this->logger->add('tigo_money',__("return_params_tigo_money: $print",'tigo-money-woo'));
 
 		$message = '';
 		$messageClass = '';
@@ -141,23 +142,25 @@ class Tigo_Money_Woo_Plugin
 			$api_key = $WC_Tigo_Money_Woo->get_option('api_key');
 			$api_secret = $WC_Tigo_Money_Woo->get_option('api_secret');
 			$access = $api_key . ":" . $api_secret;
-			$token = tigo_money_woo()->cURL->execute($WC_Tigo_Money_Woo->createUrl(true),'grant_type=client_credentials',$access);
+			$access = base64_encode($access);
+			$token = wp_safe_remote_post( $WC_Tigo_Money_Woo->createUrl(true), array('headers' => array( 'cache-control' => 'no-cache','content-type'  => 'application/x-www-form-urlencoded', 'authorization' => 'Basic '. $access ),'body' => array( 'grant_type' => 'client_credentials')));
+			if ( is_wp_error( $token ) ) {
+				$this->logger->add( 'tigo_money', __( 'We are currently experiencing problems trying to connect to this payment gateway. Sorry for the inconvenience.', 'tigo-money-woo' ) );
+				return;
+			}
+			if ( $token['response']['code'] != 200 ) {
+				$this->logger->add( 'tigo_money', __( 'Oops! Something Bad Happen, check the Consumer Key and Consumer Secret and try Again.', 'tigo-money-woo' ) );
+				return;
+			}
+			$token = wp_remote_retrieve_body( $token );
 			$token = json_decode($token);
-			if (!isset($token->accessToken)){
-				$print = print_r($token,true);
-				$logger->add('tigo_money',__("return_params_tigo_money: $print",'tigo-money-woo'));
-				return;
-			}
-			$authorization = "Authorization: Bearer $token->accessToken";
 			$mfsTransactionId = isset($_REQUEST['mfsTransactionId']) ? $_REQUEST['mfsTransactionId'] : get_bloginfo('name');
-			$status = tigo_money_woo()->cURL->execute($WC_Tigo_Money_Woo->createUrl(true,true)."$mfsTransactionId/$merchantTransactionId",'GET',$authorization);
-			$status = json_decode($status);
-			if (!isset($status->Transaction->status)){
-				$print = print_r($token,true);
-				$logger->add('tigo_money',__("return_params_tigo_money TransactionId: $print",'tigo-money-woo'));
+			$status = wp_safe_remote_get( $WC_Tigo_Money_Woo->createUrl(true,true)."$mfsTransactionId/$merchantTransactionId", array('headers' => array('cache-control' => 'no-cache', 'content-type' => 'application/json','authorization' => 'Bearer '. $token->accessToken ) ));
+			if ( is_wp_error( $status ) ) {
+				$this->logger->add( 'tigo_money', 'return_params_tigo_money, status:'  .  __( 'We are currently experiencing problems trying to connect to this payment gateway. Sorry for the inconvenience.', 'tigo-money-woo' ) );
 				return;
 			}
-
+			$status = json_decode($status);
 			switch ($status->Transaction->status){
 				case 'success':
 					$order->payment_complete($merchantTransactionId);
@@ -204,20 +207,29 @@ class Tigo_Money_Woo_Plugin
 		$order_id =(int)$_POST['id_order_tigo_money'];
 		$order = new WC_Order($order_id);
 		$access = $api_key . ":" . $api_secret;
-		$token = tigo_money_woo()->cURL->execute($WC_Tigo_Money_Woo->createUrl(true),'grant_type=client_credentials',$access);
+		$access = base64_encode($access);
+		$token = wp_safe_remote_post( $WC_Tigo_Money_Woo->createUrl(true), array('headers' => array( 'cache-control' => 'no-cache','content-type'  => 'application/x-www-form-urlencoded', 'authorization' => 'Basic '. $access ),'body' => array( 'grant_type' => 'client_credentials')));
+		if ( is_wp_error( $token ) )
+			die(json_encode(array('status' => false,'message' => __('We are currently experiencing problems trying to connect to this payment gateway. Sorry for the inconvenience.','tigo-money-woo'))));
+		if ( $token['response']['code'] != 200 )
+			die(json_encode(array('status' => false,'message' => __('Oops! Something Bad Happen, check the Consumer Key and Consumer Secret and try Again.','tigo-money-woo'))));
+		$token = wp_remote_retrieve_body( $token );
 		$token = json_decode($token);
 		if(isset($token->accessToken)){
 			$transactionid = "{$order_id}id".time();
-			$authorization = "Authorization: Bearer $token->accessToken";
 			$total=round($order->get_total(),2);
-			$array = array('Subscriber' => array('account' => $_POST['number_subscriber_tigo_money'], 'countryCode' => '595', 'country' => 'PRY', 'emailId' => $order->get_billing_email()), 'MasterMerchant' => array('account' => $WC_Tigo_Money_Woo->get_option('account'), 'pin' => $WC_Tigo_Money_Woo->get_option('pin'), 'id' => get_bloginfo('name')), 'redirectUri' => home_url('/'), 'callbackUri' => home_url('/'), 'language' => 'spa', 'OriginPayment' => array('amount' => $total, 'currencyCode' => 'PYG', 'tax' => '0.00', 'fee' => '0.00'), 'exchangeRate' => '1', 'LocalPayment' => array('amount' => $total, 'currencyCode' => 'PYG'), 'merchantTransactionId' => $transactionid);
+			$array = array('MasterMerchant' => array('account' => $WC_Tigo_Money_Woo->get_option('account'), 'pin' => '1234', 'id' => 'NETIN'),'Subscriber' => array('account' => '0981989591', 'countryCode' => '595', 'country' => 'PRY', 'emailId' => $order->get_billing_email()), 'redirectUri' => home_url('/'), 'callbackUri' => home_url('/'), 'language' => 'spa', 'OriginPayment' => array('amount' => $total, 'currencyCode' => 'PYG', 'tax' => '0.00', 'fee' => '0.00'), 'exchangeRate' => '1', 'LocalPayment' => array('amount' => $total, 'currencyCode' => 'PYG'), 'merchantTransactionId' => $transactionid);
 			$json = json_encode($array);
-			$redirectUrl = tigo_money_woo()->cURL->execute($WC_Tigo_Money_Woo->createUrl(),$json,$authorization);
-			$redirectUrl = json_decode($redirectUrl);
-			if (isset($redirectUrl->redirectUrl)){
-				die(json_encode(array('status' => true,'url' => $redirectUrl->redirectUrl)));
+			$print = print_r($json,true);
+			$this->logger->add('tigo_money',__("tigo_money_form_suscribir: $print",'tigo-money-woo'));
+			$response_authorization_payment_request = wp_safe_remote_post($WC_Tigo_Money_Woo->createUrl(),
+				array('headers' => array('cache-control' => 'no-cache', 'content-type' => 'application/json','authorization' => 'Bearer '. $token->accessToken ), 'body' => $json ));
+			$body_payment = wp_remote_retrieve_body( $response_authorization_payment_request );
+			$body_payment = json_decode($body_payment);
+			if (isset($body_payment->redirectUrl)){
+				die(json_encode(array('status' => true,'url' => $body_payment->redirectUrl)));
 			}else{
-				die(json_encode(array('status' => false,'message' => $redirectUrl->error_description)));
+				die(json_encode(array('status' => false,'message' => $body_payment->error_description)));
 			}
 		}elseif(isset($token->error_description)){
 			die(json_encode(array('status' => false, 'message' => $token->error_description)));

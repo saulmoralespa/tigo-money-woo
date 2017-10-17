@@ -138,6 +138,7 @@ Money', 'epayco_woocommerce'),
 	{
 		?>
 		<h3><?php _e('Tigo Money Woo', 'tigo-money-woo'); ?></h3>
+        <p><?php echo $this->method_description; ?></p>
 		<table class="form-table">
 			<?php
 				$this->test_tigo_money_woo_token();
