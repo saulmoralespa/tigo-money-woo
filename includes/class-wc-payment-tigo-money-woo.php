@@ -226,9 +226,16 @@ Money', 'epayco_woocommerce'),
 	public function test_tigo_money_woo_token()
 	{
 	    $access = $this->get_option('api_key') . ":" . $this->get_option('api_secret');
-		$token = tigo_money_woo()->cURL->execute($this->createUrl(true),'grant_type=client_credentials',$access);
-		$token = json_decode($token);
-		if(!isset($token->accessToken)){
+	    $access = base64_encode($access);
+		$token = wp_safe_remote_post( $this->createUrl(true), array('headers' => array( 'cache-control' => 'no-cache','content-type'  => 'application/x-www-form-urlencoded', 'authorization' => 'Basic '. $access ),'body' => array( 'grant_type' => 'client_credentials')));
+		$error = false;
+		if ( is_wp_error( $token ) ){
+		    $error = true;
+        }
+		if ( $token['response']['code'] != 200 ){
+		    $error = true;
+        }
+		if($error){
 			do_action('notices_action_tag_tigo_woo', __('Failed to connect, check client_id and client_secret accesses','tigo-money-woo'));
 		}
 	}
