@@ -164,7 +164,8 @@ Money', 'epayco_woocommerce'),
     {
 	    ?>
         <form id="account_subscriber_tigo_money">
-            <label for=""><?php echo __('Número Tigo Money','tigo-money-woo');?></label><input type='tel' name="number_subscriber_tigo_money" value="<?php echo $order->get_billing_phone();?>" required pattern="^(09)[0-9\/]{8,8}">
+            <label for=""><?php echo __('Número Tigo Money ejemplo: (09xxxxxxxx)','tigo-money-woo');?></label><input type='tel' name="number_subscriber_tigo_money" value="<?php echo $order->get_billing_phone();?>" required>
+            <div class="message_valid"></div>
             <input type="hidden" name="id_order_tigo_money" value="<?php echo $order->get_id();?>">
             <button type="submit"><?php echo __('Pagar','tigo-money-woo');?></button>
         </form>

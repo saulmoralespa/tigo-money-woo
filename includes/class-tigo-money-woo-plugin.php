@@ -128,12 +128,12 @@ class Tigo_Money_Woo_Plugin
 
 		$request = $_SERVER['REQUEST_METHOD'];
 		$merchantTransactionId = $_REQUEST['merchantTransactionId'];
-		$order_id = explode('id',$merchantTransactionId);
+		if (strpos($merchantTransactionId, 'id') === false)
+			die('No param order id');
+ 		$order_id = explode('id',$merchantTransactionId);
 		$order_id =(int)$order_id[0];
 		$order = new WC_Order($order_id);
 		$WC_Tigo_Money_Woo = new WC_Payment_Tigo_Money_Woo();
-		$print = print_r($_REQUEST,true);
-		$this->logger->add('tigo_money',__("return_params_tigo_money: $print",'tigo-money-woo'));
 
 		$message = '';
 		$messageClass = '';
@@ -154,12 +154,17 @@ class Tigo_Money_Woo_Plugin
 			}
 			$token = wp_remote_retrieve_body( $token );
 			$token = json_decode($token);
-			$mfsTransactionId = isset($_REQUEST['mfsTransactionId']) ? $_REQUEST['mfsTransactionId'] : get_bloginfo('name');
+			$mfsTransactionId = get_bloginfo('name');
 			$status = wp_safe_remote_get( $WC_Tigo_Money_Woo->createUrl(true,true)."$mfsTransactionId/$merchantTransactionId", array('headers' => array('cache-control' => 'no-cache', 'content-type' => 'application/json','authorization' => 'Bearer '. $token->accessToken ) ));
 			if ( is_wp_error( $status ) ) {
 				$this->logger->add( 'tigo_money', 'return_params_tigo_money, status:'  .  __( 'We are currently experiencing problems trying to connect to this payment gateway. Sorry for the inconvenience.', 'tigo-money-woo' ) );
 				return;
 			}
+			if ( $status['response']['code'] != 200 ) {
+				$this->logger->add( 'tigo_money', __( 'merchantTransactionId o mfsTransactionId could not be found.', 'tigo-money-woo' ) );
+				return;
+			}
+			$status = wp_remote_retrieve_body( $status );
 			$status = json_decode($status);
 			switch ($status->Transaction->status){
 				case 'success':
@@ -177,7 +182,7 @@ class Tigo_Money_Woo_Plugin
 				$WC_Tigo_Money_Woo->restore_order_stock($order_id);
 					break;
 				case 'initiated':
-					$message = __('Payment in the initiated state','');
+					$message = __('Payment in the initiated state','tigo-money-woo');
 					$messageClass = 'woocommerce-info';
 					$order->update_status('on-hold');
 					$order->add_order_note(__('Payment in the initiated state','tigo-money-woo'));
@@ -217,11 +222,9 @@ class Tigo_Money_Woo_Plugin
 		$token = json_decode($token);
 		if(isset($token->accessToken)){
 			$transactionid = "{$order_id}id".time();
-			$total=round($order->get_total(),2);
-			$array = array('MasterMerchant' => array('account' => $WC_Tigo_Money_Woo->get_option('account'), 'pin' => '1234', 'id' => 'NETIN'),'Subscriber' => array('account' => '0981989591', 'countryCode' => '595', 'country' => 'PRY', 'emailId' => $order->get_billing_email()), 'redirectUri' => home_url('/'), 'callbackUri' => home_url('/'), 'language' => 'spa', 'OriginPayment' => array('amount' => $total, 'currencyCode' => 'PYG', 'tax' => '0.00', 'fee' => '0.00'), 'exchangeRate' => '1', 'LocalPayment' => array('amount' => $total, 'currencyCode' => 'PYG'), 'merchantTransactionId' => $transactionid);
+			$total=(string)round($order->get_total(),2);
+			$array = array('MasterMerchant' => array('account' => $WC_Tigo_Money_Woo->get_option('account'), 'pin' => $WC_Tigo_Money_Woo->get_option('pin'), 'id' => get_bloginfo('name')),'Subscriber' => array('account' => $_POST['number_subscriber_tigo_money'], 'countryCode' => '595', 'country' => 'PRY', 'emailId' => $order->get_billing_email()), 'redirectUri' => home_url('/'), 'callbackUri' => home_url('/'), 'language' => 'spa', 'OriginPayment' => array('amount' => $total, 'currencyCode' => 'PYG', 'tax' => '0.00', 'fee' => '0.00'), 'exchangeRate' => '1', 'LocalPayment' => array('amount' => $total, 'currencyCode' => 'PYG'), 'merchantTransactionId' => $transactionid);
 			$json = json_encode($array);
-			$print = print_r($json,true);
-			$this->logger->add('tigo_money',__("tigo_money_form_suscribir: $print",'tigo-money-woo'));
 			$response_authorization_payment_request = wp_safe_remote_post($WC_Tigo_Money_Woo->createUrl(),
 				array('headers' => array('cache-control' => 'no-cache', 'content-type' => 'application/json','authorization' => 'Bearer '. $token->accessToken ), 'body' => $json ));
 			$body_payment = wp_remote_retrieve_body( $response_authorization_payment_request );
