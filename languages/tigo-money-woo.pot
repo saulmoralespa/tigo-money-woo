@@ -1,0 +1,211 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-10-18 19:11+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: \n"
+"Language: \n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Loco https://localise.biz/"
+
+#: tigo-money-woo.php:42
+msgid "Tigo Money Woo: Requires php version 5.6.0 or higher."
+msgstr ""
+
+#: tigo-money-woo.php:63
+msgid "Tigo Money Woo: Woocommerce must be installed and active."
+msgstr ""
+
+#: tigo-money-woo.php:71
+msgid ""
+"Tigo Money Woo: Version 3.0 or greater of installed woocommerce is required."
+msgstr ""
+
+#: tigo-money-woo.php:79
+msgid "Tigo Money: Requires currency to be PYG "
+msgstr ""
+
+#: tigo-money-woo.php:79
+#, php-format
+msgid "%s"
+msgstr ""
+
+#: tigo-money-woo.php:79
+msgid "Click here to configure"
+msgstr ""
+
+#: includes/class-tigo-money-woo-plugin.php:101
+msgid "Settings"
+msgstr ""
+
+#: includes/class-tigo-money-woo-plugin.php:102
+msgid "Documentation"
+msgstr ""
+
+#: includes/class-tigo-money-woo-plugin.php:117
+msgid "Consulting Tigo Money and generating secure url"
+msgstr ""
+
+#: includes/class-tigo-money-woo-plugin.php:118
+msgid "Redirecting to Tigo Money"
+msgstr ""
+
+#: includes/class-tigo-money-woo-plugin.php:148
+#: includes/class-tigo-money-woo-plugin.php:160
+#: includes/class-tigo-money-woo-plugin.php:218
+msgid ""
+"We are currently experiencing problems trying to connect to this payment "
+"gateway. Sorry for the inconvenience."
+msgstr ""
+
+#: includes/class-tigo-money-woo-plugin.php:152
+#: includes/class-tigo-money-woo-plugin.php:220
+msgid ""
+"Oops! Something Bad Happen, check the Consumer Key and Consumer Secret and "
+"try Again."
+msgstr ""
+
+#: includes/class-tigo-money-woo-plugin.php:164
+msgid "merchantTransactionId o mfsTransactionId could not be found."
+msgstr ""
+
+#: includes/class-tigo-money-woo-plugin.php:172
+#: includes/class-tigo-money-woo-plugin.php:174
+#: includes/class-tigo-money-woo-plugin.php:192
+msgid "Successful payment"
+msgstr ""
+
+#: includes/class-tigo-money-woo-plugin.php:178
+#: includes/class-tigo-money-woo-plugin.php:181
+msgid "Payment failed"
+msgstr ""
+
+#: includes/class-tigo-money-woo-plugin.php:185
+#: includes/class-tigo-money-woo-plugin.php:188
+msgid "Payment in the initiated state"
+msgstr ""
+
+#. Name of the plugin
+#: includes/class-wc-payment-tigo-money-woo.php:15
+#: includes/class-wc-payment-tigo-money-woo.php:140
+msgid "Tigo Money Woo"
+msgstr ""
+
+#: includes/class-wc-payment-tigo-money-woo.php:16
+msgid "Pago simple de Tigo Money solo para Paraguay."
+msgstr ""
+
+#: includes/class-wc-payment-tigo-money-woo.php:18
+msgid "Continue to payment"
+msgstr ""
+
+#: includes/class-wc-payment-tigo-money-woo.php:52
+msgid "Enable/Disable"
+msgstr ""
+
+#: includes/class-wc-payment-tigo-money-woo.php:54
+msgid "Enable Tigo Money"
+msgstr ""
+
+#: includes/class-wc-payment-tigo-money-woo.php:59
+msgid "Title"
+msgstr ""
+
+#: includes/class-wc-payment-tigo-money-woo.php:61
+msgid "It corresponds to the title that the user sees during the checkout"
+msgstr ""
+
+#: includes/class-wc-payment-tigo-money-woo.php:62
+msgid "Tigo Money"
+msgstr ""
+
+#: includes/class-wc-payment-tigo-money-woo.php:67
+msgid "Description"
+msgstr ""
+
+#: includes/class-wc-payment-tigo-money-woo.php:69
+msgid ""
+"It corresponds to the description that the user will see during the checkout"
+msgstr ""
+
+#: includes/class-wc-payment-tigo-money-woo.php:70
+msgid "Tigo Money simple payment only for Paraguay"
+msgstr ""
+
+#: includes/class-wc-payment-tigo-money-woo.php:75
+msgid "Agent account"
+msgstr ""
+
+#: includes/class-wc-payment-tigo-money-woo.php:77
+msgid ""
+"It is the electronic wallet used as how account\n"
+"electronic money collector corresponding to Commerce"
+msgstr ""
+
+#: includes/class-wc-payment-tigo-money-woo.php:84
+msgid "Agent PIN"
+msgstr ""
+
+#: includes/class-wc-payment-tigo-money-woo.php:86
+msgid "The agent pin"
+msgstr ""
+
+#: includes/class-wc-payment-tigo-money-woo.php:92
+msgid "Environment"
+msgstr ""
+
+#: includes/class-wc-payment-tigo-money-woo.php:95
+msgid "Enable to run tests"
+msgstr ""
+
+#: includes/class-wc-payment-tigo-money-woo.php:99
+msgid "Production"
+msgstr ""
+
+#: includes/class-wc-payment-tigo-money-woo.php:100
+msgid "Test"
+msgstr ""
+
+#: includes/class-wc-payment-tigo-money-woo.php:105
+msgid "client_id"
+msgstr ""
+
+#: includes/class-wc-payment-tigo-money-woo.php:116
+msgid ""
+"client_secret\n"
+msgstr ""
+
+#: includes/class-wc-payment-tigo-money-woo.php:119
+msgid ""
+"Secret password provided during the registration process with Tigo Money"
+msgstr ""
+
+#: includes/class-wc-payment-tigo-money-woo.php:167
+msgid "Número Tigo Money ejemplo: (09xxxxxxxx)"
+msgstr ""
+
+#: includes/class-wc-payment-tigo-money-woo.php:170
+msgid "Pagar"
+msgstr ""
+
+#: includes/class-wc-payment-tigo-money-woo.php:240
+msgid "Failed to connect, check client_id and client_secret accesses"
+msgstr ""
+
+#. Description of the plugin
+msgid "Tigo Money Wooo medio de pago simple, solo para Paraguay."
+msgstr ""
+
+#. Author of the plugin
+msgid "Saul Morales Pacheco"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "http://saulmoralespa.com"
+msgstr ""
