@@ -153,10 +153,10 @@ Money', 'epayco_woocommerce'),
     public function process_payment($order_id)
     {
 
-        $order = wc_get_order($order_id);
+        $params = $_POST;
+        $params['id_order'] = $order_id;
 
-        $data = tigo_money_woo()->tigo_money_transaction();
-
+        $data = tigo_money_woo()->tigo_money_transaction($params);
 
         if($data['status']){
             wc_reduce_stock_levels($order_id);

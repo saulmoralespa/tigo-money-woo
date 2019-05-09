@@ -205,7 +205,7 @@ class Tigo_Money_Woo_Plugin
 
 	}
 
-	public function tigo_money_transaction()
+	public function tigo_money_transaction(array $params)
 	{
 
 		$WC_Tigo_Money_Woo = new WC_Payment_Tigo_Money_Woo();
@@ -217,7 +217,7 @@ class Tigo_Money_Woo_Plugin
 
         $uri_redirect = $environment == "test" ? $redirect_test : home_url('/');
 
-		$order_id =(int)$_POST['id_order'];
+		$order_id =(int)$params['id_order'];
 		$order = new WC_Order($order_id);
 		$access = $api_key . ":" . $api_secret;
 		$access = base64_encode($access);
@@ -232,8 +232,9 @@ class Tigo_Money_Woo_Plugin
 		$token = json_decode($token);
 		if(isset($token->accessToken)){
 			$transactionid = "{$order_id}id".time();
-			$total=(string)round($order->get_total(),2);
-			$array = array('MasterMerchant' => array('account' => $WC_Tigo_Money_Woo->get_option('account'), 'pin' => $WC_Tigo_Money_Woo->get_option('pin'), 'id' => get_bloginfo('name')),'Subscriber' => array('account' => $_POST['number_tigo_money'], 'countryCode' => '595', 'country' => 'PRY', 'emailId' => $order->get_billing_email()), 'redirectUri' => $uri_redirect, 'callbackUri' => $uri_redirect, 'language' => 'spa', 'OriginPayment' => array('amount' => $total, 'currencyCode' => 'PYG', 'tax' => '0.00', 'fee' => '0.00'), 'exchangeRate' => '1', 'LocalPayment' => array('amount' => $total, 'currencyCode' => 'PYG'), 'merchantTransactionId' => $transactionid);
+            $total=(string)round($order->get_total(),2);
+
+			$array = array('MasterMerchant' => array('account' => $WC_Tigo_Money_Woo->get_option('account'), 'pin' => $WC_Tigo_Money_Woo->get_option('pin'), 'id' => get_bloginfo('name')),'Subscriber' => array('account' => $params['number_tigo_money'], 'countryCode' => '595', 'country' => 'PRY', 'emailId' => $order->get_billing_email()), 'redirectUri' => $uri_redirect, 'callbackUri' => $uri_redirect, 'language' => 'spa', 'OriginPayment' => array('amount' => $total, 'currencyCode' => 'PYG', 'tax' => '0.00', 'fee' => '0.00'), 'exchangeRate' => '1', 'LocalPayment' => array('amount' => $total, 'currencyCode' => 'PYG'), 'merchantTransactionId' => $transactionid);
 			$json = json_encode($array);
 			$response_authorization_payment_request = wp_safe_remote_post($WC_Tigo_Money_Woo->createUrl(),
 				array('headers' => array('cache-control' => 'no-cache', 'content-type' => 'application/json','authorization' => 'Bearer '. $token->accessToken ), 'body' => $json ));
