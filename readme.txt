@@ -4,7 +4,7 @@ Tags: commerce, e-commerce, commerce, wordpress ecommerce, store, sales, sell, s
 Requires at least: 4.8.2
 Tested up to: 4.8.2
 Requires PHP: 5.6.0
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,3 +68,5 @@ Simple, cuando realiza cambios se le informara si hay un error. Durante el proce
 
 = 1.0.0 =
 * Initial stable release
+= 1.0.1 =
+* added payment fields

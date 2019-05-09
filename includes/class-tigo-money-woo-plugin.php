@@ -91,8 +91,6 @@ class Tigo_Money_Woo_Plugin
 		add_filter( 'woocommerce_payment_gateways', array($this, 'woocommerce_tigo_money_add_gateway'));
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		add_action( 'wp', array($this, 'return_params_tigo_money'));
-		add_action('wp_ajax_tigo_money_form',array($this,'tigo_money_form_suscribir'));
-		add_action('wp_ajax_nopriv_tigo_money_form',array($this,'tigo_money_form_suscribir'));
 	}
 
 	public function plugin_action_links($links)
@@ -111,13 +109,17 @@ class Tigo_Money_Woo_Plugin
 
 	public function enqueue_scripts()
 	{
-		wp_enqueue_script( 'tigo-money-woo', $this->plugin_url . 'assets/js/tigo-money-woo.js', array( 'jquery' ), $this->version, true );
-		wp_localize_script( 'tigo-money-woo', 'tigo_money_woo', array(
-			'ajaxurl' => admin_url( 'admin-ajax.php' ),
-			'loading' => __('Consulting Tigo Money and generating secure url','tigo-money-woo'),
-			'message_redirect' => __('Redirecting to Tigo Money','tigo-money-woo')
-		) );
-		wp_enqueue_style('frontend-tigo-money-woo', $this->plugin_url . 'assets/css/tigo-money-woo.css', array(), $this->version, null);
+
+        if(is_checkout()){
+            wp_enqueue_script( 'tigo-money-woo', $this->plugin_url . 'assets/js/tigo-money-woo.js', array( 'jquery' ), $this->version, true );
+            wp_enqueue_script( 'tigo-money-sweet-alert', $this->plugin_url . 'assets/js/sweetalert2.js', array( 'jquery' ), $this->version, true );
+            wp_localize_script( 'tigo-money-woo', 'tigo_money_woo', array(
+                'ajaxurl' => admin_url( 'admin-ajax.php' ),
+                'loading' => __('Consulting Tigo Money and generating secure url','tigo-money-woo'),
+                'message_redirect' => __('Redirecting to Tigo Money','tigo-money-woo')
+            ) );
+            wp_enqueue_style('frontend-tigo-money-woo', $this->plugin_url . 'assets/css/tigo-money-woo.css', array(), $this->version, null);
+        }
 	}
 
 	public function return_params_tigo_money()
@@ -203,41 +205,43 @@ class Tigo_Money_Woo_Plugin
 
 	}
 
-	public function tigo_money_form_suscribir()
+	public function tigo_money_transaction()
 	{
 
 		$WC_Tigo_Money_Woo = new WC_Payment_Tigo_Money_Woo();
 		$api_key = $WC_Tigo_Money_Woo->get_option('api_key');
 		$api_secret = $WC_Tigo_Money_Woo->get_option('api_secret');
-		$order_id =(int)$_POST['id_order_tigo_money'];
+		$order_id =(int)$_POST['id_order'];
 		$order = new WC_Order($order_id);
 		$access = $api_key . ":" . $api_secret;
 		$access = base64_encode($access);
 		$token = wp_safe_remote_post( $WC_Tigo_Money_Woo->createUrl(true), array('headers' => array( 'cache-control' => 'no-cache','content-type'  => 'application/x-www-form-urlencoded', 'authorization' => 'Basic '. $access ),'body' => array( 'grant_type' => 'client_credentials')));
+
+
 		if ( is_wp_error( $token ) )
-			die(json_encode(array('status' => false,'message' => __('We are currently experiencing problems trying to connect to this payment gateway. Sorry for the inconvenience.','tigo-money-woo'))));
+			return (json_encode(array('status' => false,'message' => __('We are currently experiencing problems trying to connect to this payment gateway. Sorry for the inconvenience.','tigo-money-woo'))));
 		if ( $token['response']['code'] != 200 )
-			die(json_encode(array('status' => false,'message' => __('Oops! Something Bad Happen, check the Consumer Key and Consumer Secret and try Again.','tigo-money-woo'))));
+			return array('status' => false,'message' => __('Oops! Something Bad Happen, check the Consumer Key and Consumer Secret and try Again.','tigo-money-woo'));
 		$token = wp_remote_retrieve_body( $token );
 		$token = json_decode($token);
 		if(isset($token->accessToken)){
 			$transactionid = "{$order_id}id".time();
 			$total=(string)round($order->get_total(),2);
-			$array = array('MasterMerchant' => array('account' => $WC_Tigo_Money_Woo->get_option('account'), 'pin' => $WC_Tigo_Money_Woo->get_option('pin'), 'id' => get_bloginfo('name')),'Subscriber' => array('account' => $_POST['number_subscriber_tigo_money'], 'countryCode' => '595', 'country' => 'PRY', 'emailId' => $order->get_billing_email()), 'redirectUri' => home_url('/'), 'callbackUri' => home_url('/'), 'language' => 'spa', 'OriginPayment' => array('amount' => $total, 'currencyCode' => 'PYG', 'tax' => '0.00', 'fee' => '0.00'), 'exchangeRate' => '1', 'LocalPayment' => array('amount' => $total, 'currencyCode' => 'PYG'), 'merchantTransactionId' => $transactionid);
+			$array = array('MasterMerchant' => array('account' => $WC_Tigo_Money_Woo->get_option('account'), 'pin' => $WC_Tigo_Money_Woo->get_option('pin'), 'id' => get_bloginfo('name')),'Subscriber' => array('account' => $_POST['number_tigo_money'], 'countryCode' => '595', 'country' => 'PRY', 'emailId' => $order->get_billing_email()), 'redirectUri' => home_url('/'), 'callbackUri' => home_url('/'), 'language' => 'spa', 'OriginPayment' => array('amount' => $total, 'currencyCode' => 'PYG', 'tax' => '0.00', 'fee' => '0.00'), 'exchangeRate' => '1', 'LocalPayment' => array('amount' => $total, 'currencyCode' => 'PYG'), 'merchantTransactionId' => $transactionid);
 			$json = json_encode($array);
 			$response_authorization_payment_request = wp_safe_remote_post($WC_Tigo_Money_Woo->createUrl(),
 				array('headers' => array('cache-control' => 'no-cache', 'content-type' => 'application/json','authorization' => 'Bearer '. $token->accessToken ), 'body' => $json ));
 			$body_payment = wp_remote_retrieve_body( $response_authorization_payment_request );
 			$body_payment = json_decode($body_payment);
 			if (isset($body_payment->redirectUrl)){
-				die(json_encode(array('status' => true,'url' => $body_payment->redirectUrl)));
+				return array('status' => true,'url' => $body_payment->redirectUrl);
 			}else{
-				die(json_encode(array('status' => false,'message' => $body_payment->error_description)));
+				return array('status' => false,'message' => $body_payment->error_description);
 			}
 		}elseif(isset($token->error_description)){
-			die(json_encode(array('status' => false, 'message' => $token->error_description)));
+			return array('status' => false, 'message' => $token->error_description);
 		}elseif(isset($token->fault->faultstring)){
-			die(json_encode(array('status' => false, 'message' => $token->fault->faultstring)));
+			return array('status' => false, 'message' => $token->fault->faultstring);
 		}
 
 	}

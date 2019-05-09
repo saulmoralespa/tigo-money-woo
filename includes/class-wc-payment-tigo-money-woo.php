@@ -16,7 +16,7 @@ class WC_Payment_Tigo_Money_Woo extends WC_Payment_Gateway
 		$this->method_description = __('Pago simple de Tigo Money solo para Paraguay.', 'tigo-money-woo');
 		$this->description  = $this->get_option( 'description' );
 		$this->order_button_text = __('Continue to payment', 'tigo-money-woo');
-		$this->has_fields = false;
+		$this->has_fields = true;
 		$this->supports = array('products');
 		$this->init_form_fields();
 		$this->init_settings();
@@ -115,7 +115,7 @@ Money', 'epayco_woocommerce'),
 			'api_secret' => array(
 				'title' => __('client_secret
 ', 'tigo-money-woo'),
-				'type' => 'text',
+				'type' => 'password',
 				'description' => __('Secret password provided during the registration process with Tigo Money', 'tigo-money-woo'),
 				'default' => '',
 				'desc_tip' => true,
@@ -124,79 +124,62 @@ Money', 'epayco_woocommerce'),
 		);
 	}
 
-	public function process_payment($order_id)
-	{
-		$order = wc_get_order( $order_id );
-		$order->reduce_order_stock();
-		WC()->cart->empty_cart();
-		return array('result' => 'success', 'redirect' => $order->get_checkout_payment_url(true)
-		);
-	}
-
 
 	public function admin_options()
-	{
-		?>
-		<h3><?php _e('Tigo Money Woo', 'tigo-money-woo'); ?></h3>
-        <p><?php echo $this->method_description; ?></p>
-		<table class="form-table">
-			<?php
-				$this->test_tigo_money_woo_token();
-				$this->generate_settings_html();
-			?>
-		</table>
-		<?php
-	}
-
-	/**
-	 * @param $order_id
-	 */
-	public function receipt_page($order_id)
-	{
-
-	    global $woocommerce;
-		$order = new WC_Order($order_id);
-		echo $this->generate_tigo_money_form($order);
-
-	}
-
-	public function generate_tigo_money_form($order)
     {
-	    ?>
-        <form id="account_subscriber_tigo_money">
-            <label for=""><?php echo __('Número Tigo Money ejemplo: (09xxxxxxxx)','tigo-money-woo');?></label><input type='tel' name="number_subscriber_tigo_money" value="<?php echo $order->get_billing_phone();?>" required>
-            <div class="message_valid"></div>
-            <input type="hidden" name="id_order_tigo_money" value="<?php echo $order->get_id();?>">
-            <button type="submit"><?php echo __('Pagar','tigo-money-woo');?></button>
-        </form>
-        <div class='overlay-tigo-money-woo' style='display: none;'>
-            <div class='overlay-content-tigo-money-woo'>
-                <img src='<?php echo tigo_money_woo()->plugin_url . "assets/img/loading29.gif"; ?>' alt='Loading ...'>
-            </div>
-        </div>
-	    <?php
+        ?>
+        <h3><?php _e('Tigo Money Woo', 'tigo-money-woo'); ?></h3>
+        <p><?php echo $this->method_description; ?></p>
+        <table class="form-table">
+            <?php
+            $this->test_tigo_money_woo_token();
+            $this->generate_settings_html();
+            ?>
+        </table>
+        <?php
     }
 
-	public function restore_order_stock($order_id)
-	{
-		$order = new WC_Order($order_id);
-		if (!get_option('woocommerce_manage_stock') == 'yes' && !sizeof($order->get_items()) > 0) {
-			return;
-		}
-		foreach ($order->get_items() as $item) {
-			if ($item['product_id'] > 0) {
-				$_product = $order->get_product_from_item($item);
-				if ($_product && $_product->exists() && $_product->managing_stock()) {
-					$old_stock = $_product->stock;
-					$qty = apply_filters('woocommerce_order_item_quantity', $item['qty'], $this, $item);
-					$new_quantity = $_product->increase_stock($qty);
-					do_action('woocommerce_auto_stock_restored', $_product, $item);
-					$order->add_order_note(sprintf(__('Item #%s stock incremented from %s to %s.', 'woocommerce'), $item['product_id'], $old_stock, $new_quantity));
-					$order->send_stock_notifications($_product, $new_quantity, $item['qty']);
-				}
-			}
-		}
-	}
+
+    public function validate_fields()
+    {
+        if (isset($_POST['error_tigo_money'])){
+            wc_add_notice($_POST['error_tigo_money'], 'error' );
+            return false;
+        }
+
+        return true;
+    }
+
+    public function process_payment($order_id)
+    {
+
+        $order = wc_get_order($order_id);
+
+        $data = tigo_money_woo()->tigo_money_transaction();
+
+
+        if($data['status']){
+            wc_reduce_stock_levels($order_id);
+            WC()->cart->empty_cart();
+            return array(
+                'result' => 'success',
+                'redirect' => $data['url']
+            );
+        }else{
+            wc_add_notice($data['message'], 'error' );
+        }
+    }
+
+
+    public function payment_fields()
+    {
+        ?>
+            <label for="number_subscriber_tigo_money">
+                <?php echo __('Número Tigo Money ejemplo: (09xxxxxxxx)','tigo-money-woo');?>
+            </label>
+            <input type='tel' id="number_tigo_money" name="number_subscriber_tigo_money" required>
+        <?php
+    }
 
 	public function order_received_message( $text, $order ) {
 		if(!empty($_GET['msg'])){

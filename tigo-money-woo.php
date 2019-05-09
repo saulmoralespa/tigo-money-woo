@@ -2,19 +2,21 @@
 /*
 Plugin Name: Tigo Money Woo
 Description: Tigo Money Wooo medio de pago simple, solo para Paraguay.
-Version: 1.0.0
+Version: 1.0.1
 Author: Saul Morales Pacheco
 Author URI: http://saulmoralespa.com
 License: GNU General Public License v3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Text Domain: tigo-money-woo
 Domain Path: /languages
+WC tested up to: 3.6
+WC requires at least: 2.6
 */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; //Exit if accessed directly
 }
 if(!defined('TIGO_MONEY_WOO_VERSION')){
-	define('TIGO_MONEY_WOO_VERSION', '1.0.0');
+	define('TIGO_MONEY_WOO_VERSION', '1.0.1');
 }
 add_action('plugins_loaded','tigo_money_woo_init',0);
 
