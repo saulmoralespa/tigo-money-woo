@@ -48,13 +48,17 @@ class WC_Payment_Tigo_Money_Woo extends WC_Payment_Gateway
 	});
 });");
 		$this->form_fields = array(
+            'url_callback'          => array(
+                'title'       => __( 'Callback URL', 'tigo-money-woo'),
+                'type'        => 'title',
+                'description' => __( get_bloginfo( 'url' ), 'tigo-money-woo' ),
+            ),
 			'enabled' => array(
 				'title' => __('Enable/Disable', 'tigo-money-woo'),
 				'type' => 'checkbox',
 				'label' => __('Enable Tigo Money', 'tigo-money-woo'),
 				'default' => 'no'
 			),
-
 			'title' => array(
 				'title' => __('Title', 'tigo-money-woo'),
 				'type' => 'text',
@@ -213,15 +217,15 @@ Money', 'epayco_woocommerce'),
 	    $access = base64_encode($access);
 		$token = wp_safe_remote_post( $this->createUrl(true), array('headers' => array( 'cache-control' => 'no-cache','content-type'  => 'application/x-www-form-urlencoded', 'authorization' => 'Basic '. $access ),'body' => array( 'grant_type' => 'client_credentials')));
 		$error = false;
-		if ( is_wp_error( $token ) ){
+
+		if ( is_wp_error( $token ) )
 		    $error = true;
-        }
-		if ( $token['response']['code'] != 200 ){
+
+		if ( $token['response']['code'] != 200 )
 		    $error = true;
-        }
-		if($error){
+
+		if($error)
 			do_action('notices_action_tag_tigo_woo', __('Failed to connect, check client_id and client_secret accesses','tigo-money-woo'));
-		}
 	}
 
 }
